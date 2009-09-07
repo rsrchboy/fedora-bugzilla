@@ -43,7 +43,7 @@ use namespace::clean -except => 'meta';
 
 use overload '""' => sub { shift->id }, fallback => 1;
 
-our $VERSION = 0.04;
+our $VERSION = '0.09';
 
 ########################################################################
 # parent Fedora::Bugzilla 
@@ -364,9 +364,10 @@ has _flags => (
     auto_deref => 1,
     builder    => '_build__flags',
     clearer    => 'clear_flags',
-    predicate  => 'has_flags',
+    predicate  => '_has__flags',
 
     provides => {
+        'empty'  => 'has_flags',
         'get'    => 'get_flag',
         'count'  => 'flag_count',
         'exists' => 'has_flag',
@@ -419,14 +420,14 @@ has _uris => (
     lazy_build => 1,
 
     provides => {
-        'grep'  => 'grep_uris',
-        'map'   => 'map_uris',
-        'count' => 'uri_count',
+        'grep'     => 'grep_uris',
+        'map'      => 'map_uris',
+        'count'    => 'uri_count',
         'elements' => 'uris',
-        'empty' => 'has_uris',
-        'first' => 'first_uri',
-        'last'  => 'last_uri',
-        'get'   => 'get_uri',
+        'empty'    => 'has_uris',
+        'first'    => 'first_uri',
+        'last'     => 'last_uri',
+        'get'      => 'get_uri',
     },
 );
 
@@ -1040,9 +1041,7 @@ An alias for set_flags().
 
 =item B<has_flags>
 
-True if we've already generated our list of flags from the bug.  Note this
-should not be used to determine if any flags are present in the bug; use
-flag_count() for that.
+True if this bug has any flags (any value).
 
 =item B<clear_flags>
 

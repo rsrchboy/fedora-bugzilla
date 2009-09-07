@@ -26,7 +26,7 @@ extends 'RPC::XML::Client', 'Moose::Object';
 # debugging
 #use Smart::Comments '###', '####';
 
-our $VERSION = 0.04;
+our $VERSION = '0.05';
 
 has login_cb => (is => 'ro', isa => 'CodeRef', required => 1);
 

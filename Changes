@@ -1,5 +1,9 @@
 Revision history for Fedora-Bugzilla
 
+0.09 Sat Apr 25 2009
+- minor login tweaks (still needs work)
+- enhance Bug's uri/flags attributes handling
+
 0.08 Sun Mar 22 2009
 - fix uris builder
 - add additional metadata to META.yml (repository)

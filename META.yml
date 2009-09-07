@@ -41,4 +41,4 @@ requires:
   namespace::clean: 0
 resources:
   repository: http://hg.fedoraproject.org//hg/camelus
-version: 0.08
+version: 0.09

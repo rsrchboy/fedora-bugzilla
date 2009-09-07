@@ -30,7 +30,7 @@ use namespace::clean -except => 'meta';
 
 use overload '""' => sub { shift->as_string }, fallback => 1;
 
-our $VERSION = 0.04;
+our $VERSION = '0.05';
 
 =begin inline_comment
 

@@ -44,7 +44,7 @@ use HTTP::Cookies;
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = 0.08;
+our $VERSION = '0.09';
 
 ## not needed ATM
 #subtype 'HTTP::Cookies'
@@ -160,15 +160,19 @@ has login => (
         my $self = shift @_;
 
         ### logging in...
-        my $id = $self->rpc->simple_request(
+        my $ret = $self->rpc->simple_request(
             'User.login',
             {
                 login    => $self->userid,
                 password => $self->passwd,
             }
-        )->{id};
+        #)->{id};
+        );
 
-        return $id if $id;
+        ### $ret
+        #die;
+
+        return $ret->{id} if $ret;
 
         die 'Could not log in to bugzilla! (password problem?)';
     },

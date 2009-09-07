@@ -25,7 +25,7 @@ use namespace::clean;
 
 use overload '""' => sub { shift->status }, fallback => 1;
 
-our $VERSION = 0.04;
+our $VERSION = '0.05';
 
 has [ qw{ name status } ] => (is => 'ro', isa => 'Str', required => 1);
 has setter => (is => 'ro', isa => EmailAddress, required => 1, coerce => 1);
