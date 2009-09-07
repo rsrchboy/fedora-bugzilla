@@ -1,5 +1,10 @@
 Revision history for Fedora-Bugzilla
 
+0.08 Sun Mar 22 2009
+- fix uris builder
+- add additional metadata to META.yml (repository)
+- refactor some bug attributes to better leverage MX::AH
+
 0.07 Sun Mar 08 2009
 - mark DateTime::Format::Pg as a requires
 

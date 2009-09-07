@@ -404,7 +404,7 @@ sub _build__flags {
     return \%f;
 }
 
-has uris => (
+has _uris => (
     metaclass => 'Collection::List',
     
     # I think this should "just work"
@@ -422,11 +422,15 @@ has uris => (
         'grep'  => 'grep_uris',
         'map'   => 'map_uris',
         'count' => 'uri_count',
-        # ...more?
+        'elements' => 'uris',
+        'empty' => 'has_uris',
+        'first' => 'first_uri',
+        'last'  => 'last_uri',
+        'get'   => 'get_uri',
     },
 );
 
-sub _build_all_uris {
+sub _build__uris {
     my $self = shift @_;
 
     # creating our find object...
@@ -441,7 +445,7 @@ sub _build_all_uris {
     return \@uris;
 }
 
-has comments => (
+has _comments => (
     metaclass => 'Collection::List',
     
     traits   => [ 'CascadeClear' ],
@@ -449,19 +453,22 @@ has comments => (
 
     is         => 'ro',
     isa        => 'ArrayRef[Fedora::Bugzilla::Bug::Comment]',
-    auto_deref => 1,
     lazy_build => 1,
 
     provides => {
-        'count' => 'comment_count',
-        'get'   => 'get_comment',
-        'first' => 'first_comment',
-        'last'  => 'last_comment',
+        'count'    => 'comment_count',
+        'get'      => 'get_comment',
+        'first'    => 'first_comment',
+        'last'     => 'last_comment',
+        'grep'     => 'grep_comments',
+        'map'      => 'map_comments',
+        'elements' => 'comments',
+        'empty'    => 'has_comments',
         #...
     },
 );
 
-sub _build_comments {
+sub _build__comments {
     my $self =  shift @_;
 
     # get all our elements...
@@ -491,7 +498,6 @@ has _attachments => (
 
     is         => 'ro',
     isa        => 'ArrayRef[Fedora::Bugzilla::Bug::Attachment]',
-    auto_deref => 1,
     lazy_build => 1,
 
     provides => {
@@ -501,6 +507,8 @@ has _attachments => (
         'get'      => 'get_attachment',
         'first'    => 'first_attachment',
         'last'     => 'last_attachment',
+        'grep'     => 'grep_attachments',
+        'map'      => 'map_attachments',
         #...
     },
 );

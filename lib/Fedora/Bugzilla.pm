@@ -44,7 +44,7 @@ use HTTP::Cookies;
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 ## not needed ATM
 #subtype 'HTTP::Cookies'
@@ -223,6 +223,8 @@ sub create_user {
 
 ########################################################################
 # products 
+
+#has _products => ( ... );
 
 # a little sugar to get us to the same name as WWW::Bugzilla3/Bugzilla
 # internals
