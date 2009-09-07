@@ -1,5 +1,8 @@
 Revision history for Fedora-Bugzilla
 
+0.10 Sat Apr 25 2009
+- aaaand fix our $VERSIONs
+
 0.09 Sat Apr 25 2009
 - minor login tweaks (still needs work)
 - enhance Bug's uri/flags attributes handling
