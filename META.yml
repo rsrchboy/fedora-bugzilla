@@ -1,0 +1,41 @@
+---
+abstract: 'Interact with Fedora''s bugzilla instance '
+author:
+  - 'Chris Weyl <cweyl@alumni.drew.edu>'
+build_requires:
+  Test::More: 0
+distribution_type: module
+generated_by: 'Module::Install version 0.77'
+license: lgpl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: Fedora-Bugzilla
+no_index:
+  directory:
+    - inc
+    - t
+requires:
+  Crypt::SSLeay: 0
+  DateTime::Format::Builder: 0
+  Email::Address: 0
+  HTTP::Cookies: 0
+  MIME::Base64: 0
+  Moose: 0
+  Moose::Util::TypeConstraints: 0
+  MooseX::AttributeHelpers: 0
+  MooseX::MultiInitArg: 0
+  MooseX::StrictConstructor: 0
+  MooseX::Traits::Attribute::CascadeClear: 0
+  MooseX::Traits::Attribute::CascadeClearMaster: 0
+  MooseX::Types: 0
+  MooseX::Types::DateTime: 0
+  MooseX::Types::Path::Class: 0
+  MooseX::Types::URI: 0
+  RPC::XML::Client: 0
+  Regexp::Common: 0
+  URI::Fetch: 0
+  URI::Find: 0
+  XML::Twig: 0
+  namespace::clean: 0
+version: 0.06
