@@ -44,7 +44,7 @@ use HTTP::Cookies;
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 ## not needed ATM
 #subtype 'HTTP::Cookies'

@@ -17,7 +17,7 @@ no_index:
     - t
 requires:
   Crypt::SSLeay: 0
-  DateTime::Format::Builder: 0
+  DateTime::Format::Pg: 0
   Email::Address: 0
   HTTP::Cookies: 0
   MIME::Base64: 0
@@ -38,4 +38,4 @@ requires:
   URI::Find: 0
   XML::Twig: 0
   namespace::clean: 0
-version: 0.06
+version: 0.07
