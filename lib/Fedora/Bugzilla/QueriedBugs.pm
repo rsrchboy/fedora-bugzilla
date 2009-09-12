@@ -27,7 +27,7 @@ use namespace::clean -except => 'meta';
 
 extends 'Fedora::Bugzilla::Bugs';
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 has sql => 
     (is => 'ro', isa => 'Str',      predicate => 'has_sql', required => 1);
