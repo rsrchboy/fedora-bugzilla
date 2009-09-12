@@ -1,12 +1,12 @@
 use inc::Module::Install;
 
+githubmeta;
+
 name     'Fedora-Bugzilla';
 all_from 'lib/Fedora/Bugzilla.pm';
 author   'Chris Weyl <cweyl@alumni.drew.edu>';
 
 no_index 'directory' => 'xt';
-
-repository 'http://hg.fedoraproject.org//hg/camelus';
 
 requires 'namespace::clean';
 
@@ -38,7 +38,7 @@ requires 'XML::Twig';
 test_requires 'Test::More';
 
 extra_tests;
-
+auto_provides;
 auto_install;
 
 WriteAll;
