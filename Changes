@@ -1,5 +1,9 @@
 Revision history for Fedora-Bugzilla
 
+0.11 Fri Sep 11 2009
+- metadata updates
+- fix the Types '=>' issues
+
 0.10 Sat Apr 25 2009
 - aaaand fix our $VERSIONs
 
