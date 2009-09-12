@@ -31,21 +31,21 @@ use namespace::clean;
 use MooseX::Types 
     -declare => [ 'Str20', 'BugzillaDateTime', 'EmailAddress' ];
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
-subtype Str20
-    => as Str
-    => where { length $_ <= 20 }
+subtype Str20,
+    as Str,
+    where { length $_ <= 20 },
     ;
 
-subtype BugzillaDateTime
-    => as DateTime
-    => where { $_->formatter->isa('DateTime::Format::Pg') }
+subtype BugzillaDateTime,
+    as DateTime,
+    where { $_->formatter->isa('DateTime::Format::Pg') },
     ;
 
-coerce BugzillaDateTime
-    => from DateTime
-    => via { $_->set_formatter(DateTime::Format::Pg->new()); $_ }
+coerce BugzillaDateTime,
+    from DateTime,
+    via { $_->set_formatter(DateTime::Format::Pg->new()); $_ },
     ;
 
 #coerce BugzillaDateTime
@@ -59,19 +59,19 @@ coerce BugzillaDateTime
 
 class_type 'Email::Address';
 
-subtype EmailAddress()
-    => as 'Email::Address'
+subtype EmailAddress,
+    as 'Email::Address'
     ;
 
 for my $type (EmailAddress, 'Email::Address') {
     
-    coerce $type
-        => from Str
-        => via { my @a = Email::Address->parse($_); pop @a }
-        => from ArrayRef
-        => via { Email::Address->new(@$_) }
-        => from HashRef
-        => via { Email::Address->new(%$_) }
+    coerce $type,
+        from Str,
+        via { my @a = Email::Address->parse($_); pop @a },
+        from ArrayRef,
+        via { Email::Address->new(@$_) },
+        from HashRef,
+        via { Email::Address->new(%$_) },
         ;
 }
 
