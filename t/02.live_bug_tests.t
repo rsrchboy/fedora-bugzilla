@@ -40,7 +40,7 @@ BEGIN {
     plan skip_all => 'Must set FB_TEST_USERID & _PASSWD for live tests.'
         unless exists $ENV{FB_TEST_USERID} && exists $ENV{FB_TEST_PASSWD};
 
-    plan tests => 11;
+    plan tests => 12;
 }
 
 use Fedora::Bugzilla;
