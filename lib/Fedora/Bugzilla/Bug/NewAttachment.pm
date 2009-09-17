@@ -29,7 +29,7 @@ use Path::Class;
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 my @d = (is => 'rw', required => 1);
 

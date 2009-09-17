@@ -31,7 +31,7 @@ use namespace::clean -except => 'meta';
 
 use overload '""' => sub { shift->as_string }, fallback => 1;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 has bz => (is => 'ro', isa => 'Fedora::Bugzilla', required => 1);
 
