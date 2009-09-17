@@ -20,6 +20,7 @@ package Fedora::Bugzilla::Bug;
 use Moose;
 
 use MooseX::AttributeHelpers;
+use MooseX::CascadeClearing;
 use Moose::Util::TypeConstraints;
 use MooseX::Types::DateTimeX qw{ DateTime };
 use MooseX::Types::Path::Class;
@@ -62,13 +63,8 @@ has bz => ( is => 'ro', isa => 'Fedora::Bugzilla', required => 1);
 # that if any updates are made, this is NOT the place to do it; update() pulls
 # the new values from the attributes themselves, NOT this hash.
 
-has data => ( 
-    traits => [ 'CascadeClearMaster' ],
-
-    is         => 'ro', 
-    isa        => 'HashRef', 
-    lazy_build => 1,
-);
+has data =>
+    (is => 'ro', isa => 'HashRef', lazy_build => 1, is_clear_master => 1);
 
 sub _build_data {
     my $self = shift @_;
@@ -93,8 +89,7 @@ sub refresh { shift->clear_data }
 
 # set true when we need to do an update
 has dirty => (
-    traits   => [ 'CascadeClear' ],
-    clear_on => 'data',
+    clear_master => 'data',
     clearer  => 'clear_dirty',
     is       => 'rw', 
     isa      => 'Bool', 
@@ -144,16 +139,14 @@ sub update {
 
 # default attribute attributes :-)
 my @defaults = (
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'data',
+    clear_master   => 'data',
     is         => 'ro', 
     isa        => 'Str', 
     lazy_build => 1,
 );
 
 my @rw_defaults = ( 
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'data',
+    clear_master   => 'data',
 
     is         => 'rw', 
     isa        => 'Str', 
@@ -162,8 +155,7 @@ my @rw_defaults = (
 );
 
 my @dt_defaults = (
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'data',
+    clear_master   => 'data',
 
     is         => 'ro', 
     # FIXME hm.
@@ -177,9 +169,15 @@ my @dt_defaults = (
 # actual bug attributes 
 
 has id => ( 
-    traits    => [ 'MooseX::MultiInitArg::Trait' ],
+    # seems to fail at mixing in existing metaclass traits??
+    #traits    => [ 'MooseX::MultiInitArg::Trait' ],
+    traits    => [ 
+        'MooseX::MultiInitArg::Trait',
+        'MooseX::CascadeClearing::Role::Meta::Attribute',
+        #'MooseX::AttributeHelpers::Trait::Collection::List',
+    ],
     init_args => [ 'bug_id' ],
-    clear_on  => 'data',
+    clear_master  => 'data',
     is        => 'ro', 
     isa       => 'Int', 
     lazy      => 1, 
@@ -198,8 +196,7 @@ sub _build_id {
 }
 
 has alias => (
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'data',
+    clear_master   => 'data',
     is         => 'rw',
     isa        => 'Maybe[Str20]',
     lazy_build => 1,
@@ -217,9 +214,16 @@ sub _build_alias { shift->data->{alias} }
 has summary => (
     @rw_defaults, 
 
-    traits    => [ 'CascadeClear', 'MooseX::MultiInitArg::Trait' ],
+    # seems to fail at mixing in existing metaclass traits??
+    #traits    => [ 'MooseX::MultiInitArg::Trait' ],
+    traits    => [ 
+        'MooseX::MultiInitArg::Trait',
+        'MooseX::CascadeClearing::Role::Meta::Attribute',
+        #'MooseX::AttributeHelpers::Trait::Collection::List',
+    ],
+    init_args => [ 'bug_id' ],
     init_args => [ 'short_desc' ],
-    clear_on  => 'data',
+    clear_master  => 'data',
 
     is         => 'rw', 
     isa        => 'Str', 
@@ -272,12 +276,11 @@ sub _build_full_status {
 }
     
 has _update_these => (
-    metaclass => 'Collection::Array',
-    traits    => [ 'CascadeClear' ],
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::Array' ],
 
     is         => 'rw',
     isa        => 'ArrayRef[Str]',
-    clear_on   => 'data',
+    clear_master   => 'data',
     lazy       => 1,
     auto_deref => 1,
 
@@ -299,11 +302,11 @@ has _update_these => (
 # particular bits.
 
 has xml => (
-    traits     => [ 'CascadeClear', 'CascadeClearMaster' ],
-    clear_on   => 'data',
-    is         => 'ro', 
-    isa        => 'Str', 
-    lazy_build => 1,
+    clear_master    => 'data',
+    is_clear_master => 1,
+    is              => 'ro', 
+    isa             => 'Str', 
+    lazy_build      => 1,
 );
 
 sub _build_xml {
@@ -326,8 +329,7 @@ sub _build_xml {
 
 # parse and build the twig on demand
 has twig => (
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'xml',
+    clear_master   => 'xml',
     is         => 'ro', 
     isa        => 'XML::Twig', 
     lazy_build => 1,
@@ -349,13 +351,9 @@ sub _from_atts {
 # <flag name="fedora-review" status="+" setter="kwizart@gmail.com" />
 
 has _flags => (
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::ImmutableHash' ],
 
-    # note this is not the place to set flags :)
-    metaclass => 'Collection::ImmutableHash',
-
-    # I think this should "just work"
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'xml',
+    clear_master => 'xml',
 
     is  => 'ro',
     isa => 'HashRef[Fedora::Bugzilla::Bug::Flag]',
@@ -406,11 +404,10 @@ sub _build__flags {
 }
 
 has _uris => (
-    metaclass => 'Collection::List',
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
     
     # I think this should "just work"
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'xml',
+    clear_master   => 'xml',
 
     is  => 'ro',
     isa => 'ArrayRef[URI]',
@@ -447,10 +444,9 @@ sub _build__uris {
 }
 
 has _comments => (
-    metaclass => 'Collection::List',
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
     
-    traits   => [ 'CascadeClear' ],
-    clear_on => 'xml',
+    clear_master => 'xml',
 
     is         => 'ro',
     isa        => 'ArrayRef[Fedora::Bugzilla::Bug::Comment]',
@@ -492,10 +488,9 @@ sub _build__comments {
 }
 
 has _attachments => (
-    metaclass => 'Collection::List',
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
     
-    traits   => [ 'CascadeClear' ],
-    clear_on => 'xml',
+    clear_master => 'xml',
 
     is         => 'ro',
     isa        => 'ArrayRef[Fedora::Bugzilla::Bug::Attachment]',
@@ -538,9 +533,8 @@ sub _build__attachments {
 }
 
 has _dependson => (
-    metaclass  => 'Collection::Bag',
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'xml',
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::Bag' ],
+    clear_master   => 'xml',
     # FIXME trigger on set needed
     is         => 'ro', 
     isa        => 'Bag', 
@@ -561,9 +555,8 @@ has _dependson => (
 );
 
 has _blocked => (
-    metaclass  => 'Collection::Bag',
-    traits     => [ 'CascadeClear' ],
-    clear_on   => 'xml',
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::Bag' ],
+    clear_master   => 'xml',
     # FIXME trigger on set needed
     is         => 'ro', 
     isa        => 'Bag', 
@@ -589,10 +582,9 @@ sub _build__blocked
     { return { map { $_ => 1 } @{ shift->_from_atts('blocked')   } } }
 
 has cc_list => (
-    metaclass => 'Collection::List',
-    traits    => [ 'CascadeClear' ],
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
 
-    clear_on => 'xml',
+    clear_master => 'xml',
 
     is  => 'ro',
     #isa => 'ArrayRef[EmailAddress]',
