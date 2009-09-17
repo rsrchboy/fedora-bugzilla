@@ -1,5 +1,8 @@
 Revision history for Fedora-Bugzilla
 
+0.12 not yet released
+- Switch to MooseX::CascadeClearing
+
 0.11 Fri Sep 11 2009
 - metadata updates
 - fix the Types '=>' issues
