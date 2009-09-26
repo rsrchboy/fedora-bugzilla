@@ -44,7 +44,7 @@ use namespace::clean -except => 'meta';
 
 use overload '""' => sub { shift->id }, fallback => 1;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 ########################################################################
 # parent Fedora::Bugzilla 

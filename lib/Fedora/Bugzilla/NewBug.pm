@@ -27,7 +27,7 @@ use MooseX::Types::DateTime qw{ DateTime };
 
 use namespace::clean -except => 'meta';
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 ########################################################################
 # our types / coercions

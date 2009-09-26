@@ -23,7 +23,7 @@ use Moose::Role;
 
 #use namespace::clean -except => meta;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 sub to_hash {
     my $self = shift @_;

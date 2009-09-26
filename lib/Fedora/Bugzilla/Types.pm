@@ -31,7 +31,7 @@ use namespace::clean;
 use MooseX::Types 
     -declare => [ 'Str20', 'BugzillaDateTime', 'EmailAddress' ];
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 subtype Str20,
     as Str,
