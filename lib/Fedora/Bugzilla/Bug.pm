@@ -1,6 +1,6 @@
 #############################################################################
 #
-# An interface to Fedora's Bugzilla. 
+# An interface to Fedora's Bugzilla.
 #
 # Author:  Chris Weyl (cpan:RSRCHBOY), <cweyl@alumni.drew.edu>
 # Company: No company, personal work
@@ -36,7 +36,7 @@ use URI::Fetch;
 use URI::Find;
 use XML::Twig;
 
-use Fedora::Bugzilla::Types ':all'; 
+use Fedora::Bugzilla::Types ':all';
 use Fedora::Bugzilla::Bug::Flag;
 use Fedora::Bugzilla::Bug::Comment;
 use Fedora::Bugzilla::Bug::Attachment;
@@ -48,17 +48,17 @@ use Fedora::Bugzilla::Bug::NewAttachment;
 our $VERSION = '0.13';
 
 ########################################################################
-# parent Fedora::Bugzilla 
+# parent Fedora::Bugzilla
 
 has bz => (is => 'ro', isa => 'Fedora::Bugzilla', required => 1, track_dirty => 0);
 
 ########################################################################
-# Handle the alias on construction correctly 
+# Handle alias on construction correctly
 
 around BUILDARGS => sub {
     my $orig  = shift @_;
-    my $class = shift @_; 
-    
+    my $class = shift @_;
+
     ### in BUILDARGS...
     ##### @_
 
@@ -67,28 +67,28 @@ around BUILDARGS => sub {
         my $args = @_ > 1 ? { @_ } : $_[0];
 
         if (exists $args->{alias}) {
-            
+
             $args->{_aliases} = { $args->{alias} => 1 };
             delete $args->{alias};
             ##### $args
             return $class->$orig($args);
         }
-    } 
+    }
 
-    return $class->$orig(@_); 
-}; 
+    return $class->$orig(@_);
+};
 
 ########################################################################
-# data: the meat of it 
+# data: the meat of it
 
 # The data attibute contains the raw hashref returned by Bugs.get_bugs. Note
 # that if any updates are made, this is NOT the place to do it; update() pulls
 # the new values from the attributes themselves, NOT this hash.
 
 has data => (
-    is              => 'ro', 
-    isa             => 'HashRef', 
-    lazy_build      => 1, 
+    is              => 'ro',
+    isa             => 'HashRef',
+    lazy_build      => 1,
     is_clear_master => 1,
     track_dirty     => 0,
 );
@@ -98,7 +98,7 @@ sub _build_data {
 
     # prefer id over alias
     my $emsg = 'Neither bug id nor alias has been provided';
-    my $bug_id = $self->has_id       ? $self->id 
+    my $bug_id = $self->has_id       ? $self->id
                : $self->_has_aliases ? $self->alias
                :                       confess $emsg
                ;
@@ -110,7 +110,7 @@ sub _build_data {
 
     return $ret_hash->{bugs}->[0];
 }
-    
+
 # force a reload from bugzilla by clearing data
 sub refresh { shift->clear_data }
 
@@ -129,10 +129,10 @@ sub update {
     ### @these
 
     # force stringification
-    my %updates = 
+    my %updates =
         #map { my $x = $self->$_ || q{}; $_ => "$x" } $self->_update_these;
         map { my $x = $self->$_ || q{}; $_ => blessed $x ? "$x" : $x } $self->_update_these;
-    
+
     # _aliases is a special case...
     if (exists $updates{_aliases}) {
 
@@ -164,50 +164,50 @@ sub update {
 }
 
 ########################################################################
-# some defaults to help make things a little easier :) 
+# some defaults to help make things a little easier :)
 
 # default attribute attributes :-)
 my @defaults = (
     clear_master => 'data',
-    is          => 'ro', 
-    isa         => 'Str', 
-    lazy_build  => 1,
-    track_dirty => 0,
+
+    is         => 'ro',
+    isa        => 'Str',
+    lazy_build => 1,
 );
 
-my @rw_defaults = ( 
-    clear_master   => 'data',
+my @rw_defaults = (
+    clear_master => 'data',
 
-    is         => 'rw', 
-    isa        => 'Str', 
-    lazy_build => 1, 
+    is         => 'rw',
+    isa        => 'Str',
+    lazy_build => 1,
 );
 
 my @dt_defaults = (
     clear_master   => 'data',
 
-    is          => 'ro', 
+    is          => 'ro',
     track_dirty => 0,
     # FIXME hm.
-    #isa        => BugzillaDateTime, 
-    isa         => DateTime, 
+    #isa        => BugzillaDateTime,
+    isa         => DateTime,
     lazy_build  => 1,
     coerce      => 1,
 );
 
 ########################################################################
-# actual bug attributes 
+# actual bug attributes
 
-has id => ( 
+has id => (
     # seems to fail at mixing in existing metaclass traits??
-    traits    => [ 
+    traits    => [
         'MooseX::MultiInitArg::Trait',
         'MooseX::CascadeClearing::Role::Meta::Attribute',
     ],
     init_args => [ 'bug_id' ],
-    is        => 'ro', 
-    isa       => 'Int', 
-    lazy      => 1, 
+    is        => 'ro',
+    isa       => 'Int',
+    lazy      => 1,
     builder   => '_build_id',
     predicate => 'has_id',
 
@@ -225,7 +225,7 @@ sub _build_id {
 }
 
 has _aliases => (
-    traits     => [ 
+    traits     => [
         'MooseX::AttributeHelpers::Trait::Collection::Hash',
     ],
     is         => 'rw',
@@ -244,11 +244,12 @@ has _aliases => (
         exists => 'has_alias',
         empty  => 'has_aliases',
     },
+
 );
 
 sub add_alias { shift->_add_alias(shift, 1) }
 
-sub alias { 
+sub alias {
     my ($self, $value) = @_;
 
     #$self->_aliases({ $value => 1 }) if defined $value;
@@ -256,11 +257,11 @@ sub alias {
         if defined $value && !$self->has_alias($value);
 
     return $value if $value;
-    return ($self->aliases)[0] if $self->has_aliases; 
+    return ($self->aliases)[0] if $self->has_aliases;
 }
 
 #sub _build__aliases { { map { $_ => 1 } @{shift->data->{alias}} } }
-sub _build__aliases { 
+sub _build__aliases {
 
     my $self = shift @_;
     my $data = $self->data->{alias};
@@ -273,10 +274,10 @@ sub _build__aliases {
 # our "non-internals" values
 
 has summary => (
-    @rw_defaults, 
+    @rw_defaults,
 
     # seems to fail at mixing in existing metaclass traits??
-    traits    => [ 
+    traits    => [
         'MooseX::MultiInitArg::Trait',
         'MooseX::CascadeClearing::Role::Meta::Attribute',
     ],
@@ -284,9 +285,9 @@ has summary => (
     init_args => [ 'short_desc' ],
     clear_master  => 'data',
 
-    is         => 'rw', 
-    isa        => 'Str', 
-    lazy_build => 1, 
+    is         => 'rw',
+    isa        => 'Str',
+    lazy_build => 1,
 );
 
 sub _build_summary { shift->data->{summary} }
@@ -301,28 +302,30 @@ sub _build_last_change_time { shift->data->{last_change_time} }
 # internals values... most of them
 
 has reporter    => (@defaults, isa => EmailAddress, coerce => 1);
-has reporter_id => (@defaults);  
+has reporter_id => (@defaults);
 
 sub _build_reporter    { shift->data->{internals}->{reporter}    }
 sub _build_reporter_id { shift->data->{internals}->{reporter_id} }
 
-has bug_status   => (@rw_defaults);
-has resolution   => (@rw_defaults);
-has bug_file_loc => (@rw_defaults);
-has version      => (@rw_defaults);
-has assigned_to  => (@rw_defaults, isa => EmailAddress, coerce => 1);
-has qa_contact   => (@rw_defaults, isa => EmailAddress, coerce => 1);
-has full_status  => (@defaults);
+has bug_status        => (@rw_defaults);
+has resolution        => (@rw_defaults);
+has bug_file_loc      => (@rw_defaults);
+has version           => (@rw_defaults);
+has assigned_to       => (@rw_defaults, isa => EmailAddress, coerce => 1);
+has qa_contact        => (@rw_defaults, isa => EmailAddress, coerce => 1);
+has full_status       => (@defaults);
+has status_whiteboard => (@rw_defaults);
 
-sub status              { shift->bug_status(@_)                     }
-sub url                 { shift->bug_file_loc(@_)                   }
+sub status                   { shift->bug_status(@_)                         }
+sub url                      { shift->bug_file_loc(@_)                       }
 
-sub _build_bug_status   { shift->data->{internals}->{bug_status}    }
-sub _build_resolution   { shift->data->{internals}->{resolution}    }
-sub _build_bug_file_loc { shift->data->{internals}->{bug_file_loc}  }
-sub _build_version      { shift->data->{internals}->{version}       }
-sub _build_assigned_to  { shift->data->{internals}->{assigned_to}   }
-sub _build_qa_contact   { shift->data->{internals}->{qa_contact}    }
+sub _build_bug_status        { shift->data->{internals}->{bug_status}        }
+sub _build_resolution        { shift->data->{internals}->{resolution}        }
+sub _build_bug_file_loc      { shift->data->{internals}->{bug_file_loc}      }
+sub _build_version           { shift->data->{internals}->{version}           }
+sub _build_assigned_to       { shift->data->{internals}->{assigned_to}       }
+sub _build_qa_contact        { shift->data->{internals}->{qa_contact}        }
+sub _build_status_whiteboard { shift->data->{internals}->{status_whiteboard} }
 
 sub _build_full_status {
     my $self = shift @_;
@@ -343,8 +346,8 @@ sub _build_full_status {
 has xml => (
     clear_master    => 'data',
     is_clear_master => 1,
-    is              => 'ro', 
-    isa             => 'Str', 
+    is              => 'ro',
+    isa             => 'Str',
     lazy_build      => 1,
 );
 
@@ -352,17 +355,17 @@ sub _build_xml {
     my $self = shift @_;
 
     # FIXME we can probably separate this out a little better...
-    my $uri = 
+    my $uri =
         'https://bugzilla.redhat.com/show_bug.cgi?ctype=xml&id=' .
         $self->id
         ;
-   
+
     # FIXME caching would be nice...
     my $res = URI::Fetch->fetch($uri, UserAgent => $self->bz->ua);
 
     die 'Cannot fetch XML?! ' . URI::Fetch->errstr
         unless $res;
-    
+
     return $res->content;
 }
 
@@ -370,8 +373,8 @@ sub _build_xml {
 has twig => (
     clear_master => 'xml',
 
-    is         => 'ro', 
-    isa        => 'XML::Twig', 
+    is         => 'ro',
+    isa        => 'XML::Twig',
     lazy_build => 1,
 );
 
@@ -415,9 +418,9 @@ has _flags => (
     },
 );
 
-# name:   $flags[0]->att('name') 
-# status: $flags[0]->att('status') 
-# setter: $flags[0]->att('setter') 
+# name:   $flags[0]->att('name')
+# status: $flags[0]->att('status')
+# setter: $flags[0]->att('setter')
 
 sub _build__flags {
     my $self = shift @_;
@@ -429,9 +432,9 @@ sub _build__flags {
 
     # construct our hash: flag_name => flag_status
     #my %f = map { $flags[0]->att('name') => $flags[0]->att('status') } @flags;
-    
-    my %f = 
-        map { 
+
+    my %f =
+        map {
             $_->att('name') => Fedora::Bugzilla::Bug::Flag->new(
                 name   => $_->att('name'),
                 status => $_->att('status'),
@@ -445,7 +448,7 @@ sub _build__flags {
 
 has _uris => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
-    
+
     clear_master   => 'xml',
 
     is  => 'ro',
@@ -472,7 +475,7 @@ sub _build__uris {
 
     # creating our find object...
     my @uris;
-    my $finder = URI::Find->new(sub { push @uris, URI->new($_[1]) }); 
+    my $finder = URI::Find->new(sub { push @uris, URI->new($_[1]) });
 
     my $raw_xml = $self->xml;
     my $count = $finder->find(\$raw_xml);
@@ -484,7 +487,7 @@ sub _build__uris {
 
 has _comments => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
-    
+
     clear_master => 'xml',
 
     is         => 'ro',
@@ -512,8 +515,8 @@ sub _build__comments {
 
     my $i = 1;
 
-    my @comments = 
-        map { 
+    my @comments =
+        map {
             Fedora::Bugzilla::Bug::Comment
                 ->new(
                     bug    => $self,
@@ -522,13 +525,13 @@ sub _build__comments {
                 );
             } @elements
         ;
-    
+
     return \@comments;
 }
 
 has _attachments => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
-    
+
     clear_master => 'xml',
 
     is         => 'ro',
@@ -556,8 +559,8 @@ sub _build__attachments {
 
     my $i = 1;
 
-    my @comments = 
-        map { 
+    my @comments =
+        map {
             Fedora::Bugzilla::Bug::Attachment
                 ->new(
                     bug    => $self,
@@ -566,7 +569,7 @@ sub _build__attachments {
                 );
             } @elements
         ;
-    
+
     return \@comments;
 }
 
@@ -574,8 +577,8 @@ has _dependson => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::ImmutableHash' ],
 
     clear_master => 'xml',
-    is           => 'ro', 
-    isa          => 'HashRef[Fedora::Bugzilla::Bug]', 
+    is           => 'ro',
+    isa          => 'HashRef[Fedora::Bugzilla::Bug]',
     lazy_build   => 1,
 
     provides => {
@@ -591,8 +594,8 @@ has _blocked => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::ImmutableHash' ],
 
     clear_master => 'xml',
-    is           => 'ro', 
-    isa          => 'HashRef[Fedora::Bugzilla::Bug]', 
+    is           => 'ro',
+    isa          => 'HashRef[Fedora::Bugzilla::Bug]',
     lazy_build   => 1,
 
     provides => {
@@ -604,13 +607,13 @@ has _blocked => (
     },
 );
 
-sub __bughash { 
-    my ($self, $att_name) = @_;   
+sub __bughash {
+    my ($self, $att_name) = @_;
 
     my $bz  = $self->bz;
     my @ids = @{ $self->_from_atts($att_name) };
 
-    return { map { $_ => $bz->bug($_) } @ids }; 
+    return { map { $_ => $bz->bug($_) } @ids };
 }
 
 sub _build__dependson { shift->__bughash('dependson') }
@@ -636,15 +639,15 @@ has cc_list => (
     },
 );
 
-sub _build_cc_list { 
-    [ 
-        map { my @a = Email::Address->parse($_); pop @a } 
-            @{ shift->_from_atts('cc') } 
-    ] 
+sub _build_cc_list {
+    [
+        map { my @a = Email::Address->parse($_); pop @a }
+            @{ shift->_from_atts('cc') }
+    ]
 }
 
 ########################################################################
-# methods getting or setting various non-attribute bits 
+# methods getting or setting various non-attribute bits
 
 # bugzilla.updateFlags
 sub set_flags {
@@ -691,7 +694,7 @@ sub close {
         $self->id,
         uc $resolution,
         $self->bz->userid, q{}, # userid, psw -- not needed
-        $args{dupeid},          # only if DUPLICATE 
+        $args{dupeid},          # only if DUPLICATE
         $args{fixedin},
         $args{comment},
         $args{isprivate},       # a private comment in a public bug
@@ -731,7 +734,7 @@ sub set_status {
 
 sub status_open { shift->set_status('OPEN', @_) }
 
-# bugzilla.addAttachment 
+# bugzilla.addAttachment
 sub add_attachment {
     my $self = shift @_;
 
@@ -750,8 +753,8 @@ sub add_attachment {
     return $self->last_attachment if defined wantarray;
 }
 
-sub _create_attachment { 
-    my ($self, $data_href) = @_;    
+sub _create_attachment {
+    my ($self, $data_href) = @_;
 
     my $foo = $self
         ->bz
@@ -797,7 +800,7 @@ information, set info, attach files, add comments, etc...
 I've tried to get at least the methods I use in here.  I know I'm missing
 some, and I bet there are others I don't even know about... I'll try not to,
 but I won't guarantee that I won't change the api in some incompatable way.
-If you'd like to see something here, please either drop me a line (see AUTHOR) 
+If you'd like to see something here, please either drop me a line (see AUTHOR)
 or better yet, open a trac ticket with a patch ;)
 
 =head1 BUG CREATION, SEARCHING AND RETRIEVAL
@@ -848,7 +851,7 @@ L<Email::Address> of the person / account that filed the bug.
 
 Internal Bugzilla id of the reporter (Int).
 
-=item B<bug_status> [r/w] 
+=item B<bug_status> [r/w]
 
 =item B<status> [r/w]
 
@@ -912,9 +915,9 @@ L<Email::Address> of the qa_contact for this bug.
 
 =item B<close>
 
-=item B<close_nextrelease([Str])> 
+=item B<close_nextrelease([Str])>
 
-=item B<close_notabug([Str])> 
+=item B<close_notabug([Str])>
 
 =item B<close_dupe( ... )>
 
@@ -965,7 +968,7 @@ not necessary to call update().)
 
 =item B<has_comments>
 
-True if we've already generated our list of comments from the bug.  Note 
+True if we've already generated our list of comments from the bug.  Note
 this should not be used to determine if the bug has any comments; use
 comment_count() for that.
 
@@ -1042,7 +1045,7 @@ Returns true if this bug has the named flag.
 Returns an array of all flag names this bug has.
 
 =item B<flag_pairs>
- 
+
 FIXME
 
 =back
@@ -1166,7 +1169,7 @@ A hashref of the raw bug data provided by bugzilla.  Note that changes here
 are not reflected in bugzilla proper; you must use the accessors and call
 update() for that to happen.
 
-=over 
+=over
 
 =item I<has_data>
 
@@ -1259,8 +1262,8 @@ CC list, depends, blocks.
 
 =head1 SEE ALSO
 
-L<Fedora::Bugzilla>, L<http://www.bugzilla.org>, 
-L<http://bugzilla.redhat.com>, L<http://python-bugzilla.fedorahosted.org>, 
+L<Fedora::Bugzilla>, L<http://www.bugzilla.org>,
+L<http://bugzilla.redhat.com>, L<http://python-bugzilla.fedorahosted.org>,
 L<WWW::Bugzilla3>.
 
 =head1 AUTHOR
@@ -1273,20 +1276,20 @@ Chris Weyl  C<< <cweyl@alumni.drew.edu> >>
 Copyright (c) 2008, Chris Weyl C<< <cweyl@alumni.drew.edu> >>.
 
 This library is free software; you can redistribute it and/or modify it under
-the terms of the GNU Lesser General Public License as published by the Free 
-Software Foundation; either version 2.1 of the License, or (at your option) 
+the terms of the GNU Lesser General Public License as published by the Free
+Software Foundation; either version 2.1 of the License, or (at your option)
 any later version.
 
-This library is distributed in the hope that it will be useful, but WITHOUT 
+This library is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 OR A PARTICULAR PURPOSE.
 
-See the GNU Lesser General Public License for more details.  
+See the GNU Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public License 
-along with this library; if not, write to the 
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the
 
-    Free Software Foundation, Inc., 
-    59 Temple Place, Suite 330, 
+    Free Software Foundation, Inc.,
+    59 Temple Place, Suite 330,
     Boston, MA  02111-1307 USA
 
