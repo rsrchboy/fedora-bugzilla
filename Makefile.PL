@@ -22,8 +22,6 @@ requires 'MooseX::AttributeHelpers' => '0.21';
 requires 'MooseX::CascadeClearing';
 requires 'MooseX::MultiInitArg';
 requires 'MooseX::StrictConstructor';
-requires 'MooseX::Traits::Attribute::CascadeClear';
-requires 'MooseX::Traits::Attribute::CascadeClearMaster';
 requires 'MooseX::Types';
 requires 'MooseX::Types::DateTime';
 requires 'MooseX::Types::Path::Class';
