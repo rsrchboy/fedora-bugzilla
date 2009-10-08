@@ -21,6 +21,7 @@ use Moose;
 
 use MooseX::AttributeHelpers;
 use MooseX::CascadeClearing;
+use MooseX::TrackDirty::Attributes;
 use Moose::Util::TypeConstraints;
 use MooseX::Types::DateTimeX qw{ DateTime };
 use MooseX::Types::Path::Class;
@@ -38,9 +39,10 @@ use Fedora::Bugzilla::Bug::Attachment;
 use Fedora::Bugzilla::Bug::NewAttachment;
 
 # debugging
-#use Smart::Comments '###', '####';
+use Smart::Comments '###', '####';
 
-use namespace::clean -except => 'meta';
+#use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 use overload '""' => sub { shift->id }, fallback => 1;
 
@@ -49,7 +51,7 @@ our $VERSION = '0.13';
 ########################################################################
 # parent Fedora::Bugzilla 
 
-has bz => (is => 'ro', isa => 'Fedora::Bugzilla', required => 1);
+has bz => (is => 'ro', isa => 'Fedora::Bugzilla', required => 1, track_dirty => 0);
 
 ########################################################################
 # Handle the alias on construction correctly 
@@ -84,8 +86,13 @@ around BUILDARGS => sub {
 # that if any updates are made, this is NOT the place to do it; update() pulls
 # the new values from the attributes themselves, NOT this hash.
 
-has data =>
-    (is => 'ro', isa => 'HashRef', lazy_build => 1, is_clear_master => 1);
+has data => (
+    is              => 'ro', 
+    isa             => 'HashRef', 
+    lazy_build      => 1, 
+    is_clear_master => 1,
+    track_dirty     => 0,
+);
 
 sub _build_data {
     my $self = shift @_;
@@ -108,29 +115,9 @@ sub _build_data {
 # force a reload from bugzilla by clearing data
 sub refresh { shift->clear_data }
 
-# set true when we need to do an update
-has dirty => (
-    clear_master => 'data',
-    clearer  => 'clear_dirty',
-    is       => 'rw', 
-    isa      => 'Bool', 
-    default  => 0,
-);
-
-# tag an attribute to update; mark the object as changed but not updated.
-# this sub is the trigger used by all rw attributes
-sub _dirty_trigger  {
-    my ($self, $new_value, $meta) = @_;
-
-    ### $new_value
-    ### $meta
-
-    # FIXME not exactly sure...
-    return unless $meta;
-
-    $self->dirty(1);
-    $self->_to_update($meta->name);
-}
+# FIXME for now...
+sub dirty         { shift->_has_dirty_attributes }
+sub _update_these { shift->_dirty_attributes     }
 
 # update the dirty values in bugzilla; mark clean and purge old data
 sub update {
@@ -139,11 +126,25 @@ sub update {
     # only if we have something to update...
     return if not $self->dirty;
 
+    my @these = $self->_update_these;
+    ### @these
+
     # force stringification
     my %updates = 
         #map { my $x = $self->$_ || q{}; $_ => "$x" } $self->_update_these;
         map { my $x = $self->$_ || q{}; $_ => blessed $x ? "$x" : $x } $self->_update_these;
     
+    # _aliases is a special case...
+    if (exists $updates{_aliases}) {
+
+        # Ok, so I botched this.  Looks like bugzilla sends us aliases back in
+        # an array, but won't have anything to do with them going back across
+        # that way.  So, until I get back to reverting those changes let's
+        # "fix" it here.  FIXME *sigh*
+        $updates{alias} = $self->alias; #join q{,}, keys %{$updates{_aliases}};
+        delete $updates{_aliases};
+    }
+
     ### %updates
 
     my $ret = $self->bz->rpc->simple_request(
@@ -154,9 +155,11 @@ sub update {
         }
     );
 
+    ### $ret
+
     # clear our old data (force a reload), etc.
     $self->clear_data;
-    $self->clear_dirty;
+    #$self->clear_dirty;
 
     # FIXME should probably figure out something better to return
     return $ret;
@@ -167,10 +170,11 @@ sub update {
 
 # default attribute attributes :-)
 my @defaults = (
-    clear_master   => 'data',
-    is         => 'ro', 
-    isa        => 'Str', 
-    lazy_build => 1,
+    clear_master => 'data',
+    is          => 'ro', 
+    isa         => 'Str', 
+    lazy_build  => 1,
+    track_dirty => 0,
 );
 
 my @rw_defaults = ( 
@@ -179,18 +183,18 @@ my @rw_defaults = (
     is         => 'rw', 
     isa        => 'Str', 
     lazy_build => 1, 
-    trigger    => \&_dirty_trigger,
 );
 
 my @dt_defaults = (
     clear_master   => 'data',
 
-    is         => 'ro', 
+    is          => 'ro', 
+    track_dirty => 0,
     # FIXME hm.
     #isa        => BugzillaDateTime, 
-    isa        => DateTime, 
-    lazy_build => 1,
-    coerce     => 1,
+    isa         => DateTime, 
+    lazy_build  => 1,
+    coerce      => 1,
 );
 
 ########################################################################
@@ -205,12 +209,13 @@ has id => (
         #'MooseX::AttributeHelpers::Trait::Collection::List',
     ],
     init_args => [ 'bug_id' ],
-    clear_master  => 'data',
     is        => 'ro', 
     isa       => 'Int', 
     lazy      => 1, 
     builder   => '_build_id',
     predicate => 'has_id',
+
+    track_dirty => 0,
 );
 
 # if this gets called, we're betting alias has been set
@@ -231,26 +236,31 @@ has _aliases => (
     #isa        => 'ArrayRef[Str20]',
     isa        => 'HashRef',
     lazy_build => 1,
-    trigger    => \&_dirty_trigger,
+
+    clear_master => 'data',
 
     provides => {
         count  => 'num_aliases',
         keys   => 'aliases',
         #add    => 'add_alias',
-        set    => 'add_alias',
+        set    => '_add_alias', # FIXME curry instead?
         delete => 'delete_alias',
         exists => 'has_alias',
         empty  => 'has_aliases',
     },
 );
 
-# we should warn, but I haven't actually seen any multi-alias bugs yet
-#sub alias { ($_[0]->aliases)[0] if $_[0]->has_aliases }
+sub add_alias { shift->_add_alias(shift, 1) }
+
 sub alias { 
     my ($self, $value) = @_;
 
-    $self->_aliases({ $value => 1 }) if defined $value;
-    return ($_[0]->aliases)[0] if $_[0]->has_aliases; 
+    #$self->_aliases({ $value => 1 }) if defined $value;
+    do { $self->add_alias($value); $self->_mark_dirty('_aliases') }
+        if defined $value && !$self->has_alias($value);
+
+    return $value if $value;
+    return ($self->aliases)[0] if $self->has_aliases; 
 }
 
 #sub _build__aliases { { map { $_ => 1 } @{shift->data->{alias}} } }
@@ -286,7 +296,6 @@ has summary => (
     is         => 'rw', 
     isa        => 'Str', 
     lazy_build => 1, 
-    trigger    => \&_dirty_trigger,
 );
 
 sub _build_summary { shift->data->{summary} }
@@ -332,25 +341,6 @@ sub _build_full_status {
 
     return "$status/" . $self->resolution;
 }
-    
-has _update_these => (
-    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::Array' ],
-
-    is         => 'rw',
-    isa        => 'ArrayRef[Str]',
-    clear_master   => 'data',
-    lazy       => 1,
-    auto_deref => 1,
-
-    clearer => '_clear_update_these',
-    default => sub { [] },
-
-    provides => {
-        'push'  => '_to_update',
-        'count' => '_num_to_update',
-        # FIXME map for actual update?
-    },
-);
 
 ########################################################################
 # XML-bits
@@ -587,7 +577,6 @@ sub _build__attachments {
         ;
     
     return \@comments;
-
 }
 
 has _dependson => (
