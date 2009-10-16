@@ -47,7 +47,6 @@ sub to_hash {
     return \%data;
 }
 
-
 1;
 
 __END__

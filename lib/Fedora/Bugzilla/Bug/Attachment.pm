@@ -26,7 +26,7 @@ use MIME::Base64;
 
 use Fedora::Bugzilla::Types     qw{ BugzillaDateTime EmailAddress };
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 use overload '""' => sub { shift->as_string }, fallback => 1;
 
@@ -102,8 +102,6 @@ sub isprivate  { shift->isprivate(@_)  }
 sub as_string { shift->id }
 
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

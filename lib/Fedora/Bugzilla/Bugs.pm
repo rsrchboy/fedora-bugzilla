@@ -27,7 +27,7 @@ use XML::Twig;
 
 use Fedora::Bugzilla::Bug;
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 use overload '""' => sub { shift->as_string }, fallback => 1;
 
@@ -140,8 +140,6 @@ sub _build_bugs {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

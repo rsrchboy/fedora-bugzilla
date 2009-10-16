@@ -32,8 +32,6 @@ has setter => (is => 'ro', isa => EmailAddress, required => 1, coerce => 1);
 
 __PACKAGE__->meta->make_immutable;
 
-1;
-
 __END__
 
 =head1 NAME

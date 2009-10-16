@@ -22,7 +22,7 @@ use Moose;
 use Fedora::Bugzilla::Types  qw{ BugzillaDateTime EmailAddress };
 use MooseX::Types::DateTimeX 'DateTime';
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 use overload '""' => sub { shift->as_string }, fallback => 1;
 
@@ -87,8 +87,6 @@ sub _build_title {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

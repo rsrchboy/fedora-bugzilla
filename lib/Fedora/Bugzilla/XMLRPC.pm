@@ -17,10 +17,7 @@
 
 package Fedora::Bugzilla::XMLRPC;
 
-use English qw{ -no_match_vars };  # Avoids regex performance penalty
-
 use Moose;
-
 extends 'RPC::XML::Client', 'Moose::Object';
 
 # debugging
@@ -91,8 +88,6 @@ override send_request => sub {
 };
 
 __PACKAGE__->meta->make_immutable(inline_constructor => 0);
-
-1;
 
 __END__
 

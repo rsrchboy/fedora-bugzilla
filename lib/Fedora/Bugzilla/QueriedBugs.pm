@@ -21,7 +21,7 @@ use Moose;
 
 use MooseX::StrictConstructor;
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 #use overload '""' => sub { shift->as_string }, fallback => 1;
 
@@ -46,8 +46,6 @@ has '+ids' => (lazy => 1, builder => '_build_ids');
 sub _build_ids { [ map { $_->{bug_id} } @{ shift->raw } ] }
 
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

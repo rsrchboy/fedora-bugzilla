@@ -25,7 +25,7 @@ use Moose::Util::TypeConstraints;
 use MooseX::Types::URI qw{ Uri };
 use MooseX::Types::DateTime qw{ DateTime };
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 our $VERSION = '0.13';
 
@@ -136,12 +136,7 @@ sub bughash {
     return \%data;
 }
 
-########################################################################
-# magic end bits 
-
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

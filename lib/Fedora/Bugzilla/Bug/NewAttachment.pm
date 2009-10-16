@@ -27,7 +27,7 @@ with 'Fedora::Bugzilla::Role::NewHash';
 use MIME::Base64;
 use Path::Class;
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 our $VERSION = '0.13';
 
@@ -64,8 +64,6 @@ sub _build_data {
 }
 
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

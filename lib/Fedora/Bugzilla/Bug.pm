@@ -17,15 +17,17 @@
 
 package Fedora::Bugzilla::Bug;
 
-use Moose;
+use namespace::autoclean;
+use overload '""' => sub { shift->id }, fallback => 1;
 
+use Moose;
 use MooseX::AttributeHelpers;
 use MooseX::CascadeClearing;
 use MooseX::TrackDirty::Attributes;
 use Moose::Util::TypeConstraints;
-use MooseX::Types::DateTimeX qw{ DateTime };
-use MooseX::Types::Path::Class;
-use MooseX::Types::URI;
+use MooseX::Types::DateTimeX   ':all';
+use MooseX::Types::Path::Class ':all';
+use MooseX::Types::URI         ':all';
 
 use Path::Class;
 use URI::Fetch;
@@ -39,12 +41,7 @@ use Fedora::Bugzilla::Bug::Attachment;
 use Fedora::Bugzilla::Bug::NewAttachment;
 
 # debugging
-use Smart::Comments '###', '####';
-
-#use namespace::clean -except => 'meta';
-use namespace::autoclean;
-
-use overload '""' => sub { shift->id }, fallback => 1;
+#use Smart::Comments '###', '####';
 
 our $VERSION = '0.13';
 
@@ -159,7 +156,6 @@ sub update {
 
     # clear our old data (force a reload), etc.
     $self->clear_data;
-    #$self->clear_dirty;
 
     # FIXME should probably figure out something better to return
     return $ret;
@@ -202,11 +198,9 @@ my @dt_defaults = (
 
 has id => ( 
     # seems to fail at mixing in existing metaclass traits??
-    #traits    => [ 'MooseX::MultiInitArg::Trait' ],
     traits    => [ 
         'MooseX::MultiInitArg::Trait',
         'MooseX::CascadeClearing::Role::Meta::Attribute',
-        #'MooseX::AttributeHelpers::Trait::Collection::List',
     ],
     init_args => [ 'bug_id' ],
     is        => 'ro', 
@@ -273,9 +267,6 @@ sub _build__aliases {
     return { map { $_ => 1 } @{$self->data->{alias}} };
 }
 
-#sub __builder { shift->data->{shift} }
-#sub __internals_builder { shift->data->{internals}->{shift} }
-
 ########################################################################
 # our "non-internals" values
 
@@ -283,11 +274,9 @@ has summary => (
     @rw_defaults, 
 
     # seems to fail at mixing in existing metaclass traits??
-    #traits    => [ 'MooseX::MultiInitArg::Trait' ],
     traits    => [ 
         'MooseX::MultiInitArg::Trait',
         'MooseX::CascadeClearing::Role::Meta::Attribute',
-        #'MooseX::AttributeHelpers::Trait::Collection::List',
     ],
     init_args => [ 'bug_id' ],
     init_args => [ 'short_desc' ],
@@ -377,7 +366,8 @@ sub _build_xml {
 
 # parse and build the twig on demand
 has twig => (
-    clear_master   => 'xml',
+    clear_master => 'xml',
+
     is         => 'ro', 
     isa        => 'XML::Twig', 
     lazy_build => 1,
@@ -454,7 +444,6 @@ sub _build__flags {
 has _uris => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],
     
-    # I think this should "just work"
     clear_master   => 'xml',
 
     is  => 'ro',
@@ -634,7 +623,6 @@ has cc_list => (
     clear_master => 'xml',
 
     is  => 'ro',
-    #isa => 'ArrayRef[EmailAddress]',
     isa => 'ArrayRef[Email::Address]',
     auto_deref => 1,
     #coerce => 1,

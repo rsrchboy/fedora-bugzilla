@@ -75,7 +75,7 @@ for my $type (EmailAddress, 'Email::Address') {
         ;
 }
 
-1;
+__PACKAGE__->meta->make_immutable;
 
 __END__
 
