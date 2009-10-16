@@ -35,6 +35,7 @@ use Fedora::Bugzilla::Types ':all';
 use Fedora::Bugzilla::XMLRPC;
 
 # cpan bits
+use Config::Tiny;
 use Path::Class qw{ file dir };
 use Regexp::Common;
 use HTTP::Cookies; 
@@ -42,7 +43,7 @@ use HTTP::Cookies;
 # debugging
 #use Smart::Comments '###';
 
-use namespace::clean -except => 'meta';
+use namespace::autoclean;
 
 our $VERSION = '0.13';
 
@@ -60,19 +61,34 @@ our $VERSION = '0.13';
 # we could require one or the other be set, but there are many operations we
 # can do against bugzilla that don't actually require we be logged in
 
-has site => (is => 'ro', lazy => 1, isa => Uri, coerce => 1, lazy_build => 1);
+has site        => (is => 'ro', isa => Uri, coerce => 1, lazy_build => 1);
+has config_file => (is => 'ro', isa => File, coerce => 1, lazy_build => 1);
+
+has _config => (is => 'ro', isa => 'Config::Tiny', lazy_build => 1);
 
 has userid    => (is => 'ro', isa => 'Str',     lazy_build => 1);
-has userid_cb => (is => 'ro', isa => 'CodeRef', lazy_build => 1);
 has passwd    => (is => 'ro', isa => 'Str',     lazy_build => 1);
-has passwd_cb => (is => 'ro', isa => 'CodeRef', lazy_build => 1);
 
-sub _build_site { 'https://bugzilla.redhat.com/xmlrpc.cgi' }
+has userid_cb => (is => 'ro', isa => 'CodeRef', predicate => 'has_userid_cb');
+has passwd_cb => (is => 'ro', isa => 'CodeRef', predicate => 'has_passwd_cb');
 
-sub _build_userid    { shift->userid_cb->()  }
-sub _build_userid_cb { sub { die 'neither userid nor userid_cb set' } }
-sub _build_passwd    { shift->passwd_cb->()  }
-sub _build_passwd_cb { sub { die 'neither passwd nor userid_cb set' } }
+sub _build_site        { 'https://bugzilla.redhat.com/xmlrpc.cgi' }
+sub _build_config_file { "$ENV{HOME}/.fedora.bz.ini"              }
+sub _build__config     { Config::Tiny->read(shift->config_file)   }
+
+sub _build_userid { 
+    my $self = shift @_;
+
+    return $self->userid_cb->() if $self->has_userid_cb;
+    return $self->_config->{login}->{userid};
+}
+
+sub _build_passwd { 
+    my $self = shift @_;
+
+    return $self->passwd_cb->() if $self->has_passwd_cb;
+    return $self->_config->{login}->{passwd};
+}
 
 has new_bug_class     => (is => 'rw', isa => 'Str', lazy_build => 1);
 has default_bug_class => (is => 'rw', isa => 'Str', lazy_build => 1);
@@ -108,7 +124,7 @@ sub _build_rpc {
 has ua_agent => (is => 'ro', isa => 'Str', lazy_build => 1);
 has ua       => (is => 'ro', isa => 'LWP::UserAgent', lazy_build => 1);
 
-sub _build_ua_agent { "Fedora::Bugzilla $VERSION" }
+sub _build_ua_agent { "Fedora::Bugzilla $VERSION / " }
 
 sub _build_ua { 
     my $self = shift @_;
@@ -395,9 +411,7 @@ has last_sql => (
     clearer   => 'clear_last_sql',
 );
 
-########################################################################
-# magic end bits 
-
+__PACKAGE__->meta->make_immutable;
 1; 
 
 __END__
@@ -460,11 +474,34 @@ accessor of the same name once the object instance has been created.
 
 =item I<userid =E<gt> Str> 
 
-B<Required.>  Your bugzilla userid (generally your email address).
+Your bugzilla userid (generally your email address).
 
 =item I<passwd =E<gt> Str> 
 
-B<Required.> Your bugzilla password.
+Your bugzilla password.
+
+=item I<userid_cb =E<gt> CodeRef>
+
+A callback to be invoked when we need a userid to access Bugzilla; generally
+when we attempt login.
+
+=item I<passwd_cb =E<gt> CodeRef>
+
+As above, a callback to be invoked when we need a password to access Bugzilla;
+generally when we attempt login.
+
+=item I<config_file =E<gt> Str> 
+
+Alternatively, the login and userid can be derived from a simple ini-style
+configfile; e.g.:
+
+    [login]
+    userid=bugzilla@id.com
+    passwd=secret!
+
+The default location for this file is at "$ENV{HOME}/.fedora.bz.ini".  If
+login and passwd, or userid_cb and passwd_cb are not specified, then we try to
+read this information from this file.
 
 =item I<site =E<gt> Str|URI>
 

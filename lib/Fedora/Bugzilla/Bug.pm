@@ -776,12 +776,7 @@ sub _create_attachment {
     return shift @$foo;
 }
 
-########################################################################
-# magic end bits 
-
 __PACKAGE__->meta->make_immutable;
-
-1;
 
 __END__
 

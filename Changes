@@ -1,5 +1,9 @@
 Revision history for Fedora-Bugzilla
 
+0.14 not yet released
+- switch dirty attribute tracking system
+- add configuration file capabilities
+
 0.13 Fri Sep 25 2009
 - minor update: NewBug/alias type is now Maybe[Str]
 

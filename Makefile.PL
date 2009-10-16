@@ -8,8 +8,10 @@ author   'Chris Weyl <cweyl@alumni.drew.edu>';
 
 no_index 'directory' => 'xt';
 
+requires 'namespace::autoclean';
 requires 'namespace::clean';
 
+requires 'Config::Tiny' => '2.12';
 requires 'Crypt::SSLeay';   # https://... access to bugzilla
 requires 'DateTime::Format::Pg';
 requires 'Email::Address';
@@ -35,7 +37,7 @@ requires 'XML::Twig';
 # DateTime::Format::Bugzilla
 #requires 'DateTime::Format::Builder';
 
-test_requires 'Test::More';
+test_requires 'Test::More' => '0.92';
 
 extra_tests;
 auto_provides;
