@@ -17,6 +17,8 @@
 
 package Fedora::Bugzilla::XMLRPC;
 
+use English '-no_match_vars';
+
 use Moose;
 extends 'RPC::XML::Client', 'Moose::Object';
 
