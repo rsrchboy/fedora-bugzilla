@@ -569,53 +569,50 @@ sub _build__attachments {
 }
 
 has _dependson => (
-    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::Bag' ],
-    clear_master   => 'xml',
-    # FIXME trigger on set needed
-    is         => 'ro', 
-    isa        => 'Bag', 
-    auto_deref => 1,
-    # right now, use of lazy_build or builder is broken with this metaclass
-    #lazy_build => 1,
-    default   => sub { shift->_build__dependson },
-    clearer   => '_clear__dependson',
-    predicate => '_has__dependson',
-    lazy      => 1,
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::ImmutableHash' ],
+
+    clear_master => 'xml',
+    is           => 'ro', 
+    isa          => 'HashRef[Fedora::Bugzilla::Bug]', 
+    lazy_build   => 1,
 
     provides => {
         'empty'  => 'depends_on_anything',
         'count'  => 'num_deps',
         'exists' => 'depends_on_bug',
-        'keys'   => 'all_dependent_bugs',
+        'keys'   => 'all_dependent_bug_ids',
+        'values' => 'all_dependent_bugs',
     },
 );
 
 has _blocked => (
-    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::Bag' ],
-    clear_master   => 'xml',
-    # FIXME trigger on set needed
-    is         => 'ro', 
-    isa        => 'Bag', 
-    auto_deref => 1,
-    # right now, use of lazy_build or builder is broken with this metaclass
-    #lazy_build => 1,
-    default   => sub { shift->_build__blocked },
-    clearer   => '_clear__blocked',
-    predicate => '_has__blocked',
-    lazy      => 1,
+    traits => [ 'MooseX::AttributeHelpers::Trait::Collection::ImmutableHash' ],
+
+    clear_master => 'xml',
+    is           => 'ro', 
+    isa          => 'HashRef[Fedora::Bugzilla::Bug]', 
+    lazy_build   => 1,
 
     provides => {
         'empty'  => 'blocks_anything',
         'count'  => 'num_blocked',
         'exists' => 'blocks_bug',
-        'keys'   => 'all_blocked_bugs',
+        'keys'   => 'all_blocked_bug_ids',
+        'values' => 'all_blocked_bugs',
     },
 );
 
-sub _build__dependson 
-    { return { map { $_ => 1 } @{ shift->_from_atts('dependson') } } }
-sub _build__blocked   
-    { return { map { $_ => 1 } @{ shift->_from_atts('blocked')   } } }
+sub __bughash { 
+    my ($self, $att_name) = @_;   
+
+    my $bz  = $self->bz;
+    my @ids = @{ $self->_from_atts($att_name) };
+
+    return { map { $_ => $bz->bug($_) } @ids }; 
+}
+
+sub _build__dependson { shift->__bughash('dependson') }
+sub _build__blocked   { shift->__bughash('blocked')   }
 
 has cc_list => (
     traits => [ 'MooseX::AttributeHelpers::Trait::Collection::List' ],

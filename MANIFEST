@@ -38,6 +38,7 @@ t/05.bugs.t
 t/06.xml_bits.t
 t/07.attachments.t
 t/08.config-file.t
+t/09.depends-blocks.t
 t/50.live_attach.t
 t/51.live_bug.t
 t/60.live_bug_mods.t
