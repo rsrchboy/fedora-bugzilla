@@ -31,12 +31,14 @@ This module defines the following tests.
 use strict;
 use warnings;
 
-use Test::More tests => 7;
+use Test::More;
 
 BEGIN {
     plan skip_all => 'Must set FB_TEST_USERID & _PASSWD for live tests.'
         unless exists $ENV{FB_TEST_USERID} && exists $ENV{FB_TEST_PASSWD};
 }
+
+plan tests => 7;
 
 use Fedora::Bugzilla;
 
