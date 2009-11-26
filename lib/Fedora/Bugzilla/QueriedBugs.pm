@@ -22,6 +22,8 @@ use Moose;
 use MooseX::StrictConstructor;
 
 use namespace::autoclean;
+use MooseX::MarkAsMethods;
+
 
 #use overload '""' => sub { shift->as_string }, fallback => 1;
 

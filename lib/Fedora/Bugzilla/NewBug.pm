@@ -26,6 +26,8 @@ use MooseX::Types::URI qw{ Uri };
 use MooseX::Types::DateTime qw{ DateTime };
 
 use namespace::autoclean;
+use MooseX::MarkAsMethods;
+
 
 our $VERSION = '0.13';
 

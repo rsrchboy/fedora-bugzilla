@@ -27,6 +27,8 @@ use MIME::Base64;
 use Fedora::Bugzilla::Types     qw{ BugzillaDateTime EmailAddress };
 
 use namespace::autoclean;
+use MooseX::MarkAsMethods;
+
 
 use overload '""' => sub { shift->as_string }, fallback => 1;
 

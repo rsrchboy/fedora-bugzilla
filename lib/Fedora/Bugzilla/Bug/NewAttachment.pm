@@ -28,6 +28,8 @@ use MIME::Base64;
 use Path::Class;
 
 use namespace::autoclean;
+use MooseX::MarkAsMethods;
+
 
 our $VERSION = '0.13';
 

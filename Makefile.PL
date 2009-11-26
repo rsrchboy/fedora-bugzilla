@@ -22,6 +22,7 @@ requires 'Moose';
 requires 'Moose::Util::TypeConstraints';
 requires 'MooseX::AttributeHelpers' => '0.21';
 requires 'MooseX::CascadeClearing';
+requires 'MooseX::MarkAsMethods' => '0.02';
 requires 'MooseX::MultiInitArg';
 requires 'MooseX::StrictConstructor';
 requires 'MooseX::TrackDirty::Attributes';

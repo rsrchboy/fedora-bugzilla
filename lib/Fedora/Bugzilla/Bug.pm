@@ -18,6 +18,8 @@
 package Fedora::Bugzilla::Bug;
 
 use namespace::autoclean;
+use MooseX::MarkAsMethods;
+
 use overload '""' => sub { shift->id }, fallback => 1;
 
 use Moose;
