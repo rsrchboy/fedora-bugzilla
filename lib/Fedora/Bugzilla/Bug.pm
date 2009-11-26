@@ -43,7 +43,7 @@ use Fedora::Bugzilla::Bug::Attachment;
 use Fedora::Bugzilla::Bug::NewAttachment;
 
 # debugging
-#use Smart::Comments '###', '####';
+use Smart::Comments '###', '####';
 
 our $VERSION = '0.13';
 
@@ -55,7 +55,8 @@ has bz => (is => 'ro', isa => 'Fedora::Bugzilla', required => 1, track_dirty => 
 ########################################################################
 # Handle alias on construction correctly
 
-around BUILDARGS => sub {
+#around BUILDARGS => sub {
+sub foo_XXX {
     my $orig  = shift @_;
     my $class = shift @_;
 
@@ -133,17 +134,6 @@ sub update {
         #map { my $x = $self->$_ || q{}; $_ => "$x" } $self->_update_these;
         map { my $x = $self->$_ || q{}; $_ => blessed $x ? "$x" : $x } $self->_update_these;
 
-    # _aliases is a special case...
-    if (exists $updates{_aliases}) {
-
-        # Ok, so I botched this.  Looks like bugzilla sends us aliases back in
-        # an array, but won't have anything to do with them going back across
-        # that way.  So, until I get back to reverting those changes let's
-        # "fix" it here.  FIXME *sigh*
-        $updates{alias} = $self->alias; #join q{,}, keys %{$updates{_aliases}};
-        delete $updates{_aliases};
-    }
-
     ### %updates
 
     my $ret = $self->bz->rpc->simple_request(
@@ -219,55 +209,21 @@ sub _build_id {
     my $self = shift @_;
 
     confess 'Must set either id or alias!'
-        if not $self->_has_aliases;
+        if not $self->has_alias;
 
     return $self->data->{id};
 }
 
-has _aliases => (
-    traits     => [
-        'MooseX::AttributeHelpers::Trait::Collection::Hash',
-    ],
-    is         => 'rw',
-    #isa        => 'ArrayRef[Str20]',
-    isa        => 'HashRef',
-    lazy_build => 1,
+has alias => (is => 'rw', isa => 'Maybe[Str]', lazy_build => 1);
 
-    clear_master => 'data',
-
-    provides => {
-        count  => 'num_aliases',
-        keys   => 'aliases',
-        #add    => 'add_alias',
-        set    => '_add_alias', # FIXME curry instead?
-        delete => 'delete_alias',
-        exists => 'has_alias',
-        empty  => 'has_aliases',
-    },
-
-);
-
-sub add_alias { shift->_add_alias(shift, 1) }
-
-sub alias {
-    my ($self, $value) = @_;
-
-    #$self->_aliases({ $value => 1 }) if defined $value;
-    do { $self->add_alias($value); $self->_mark_dirty('_aliases') }
-        if defined $value && !$self->has_alias($value);
-
-    return $value if $value;
-    return ($self->aliases)[0] if $self->has_aliases;
-}
-
-#sub _build__aliases { { map { $_ => 1 } @{shift->data->{alias}} } }
-sub _build__aliases {
+sub _build_alias { 
 
     my $self = shift @_;
     my $data = $self->data->{alias};
 
     ### $data
-    return { map { $_ => 1 } @{$self->data->{alias}} };
+    return unless $data && @$data;
+    return $data->[1];
 }
 
 ########################################################################
