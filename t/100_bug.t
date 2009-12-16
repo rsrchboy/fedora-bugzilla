@@ -31,17 +31,12 @@ This module defines the following tests.
 use strict;
 use warnings;
 
-use English qw{ -no_match_vars };  # Avoids regex performance penalty
+use Test::More 0.92;
+#BEGIN { require 't/funcs.pm' unless eval { require funcs } }
+use lib 't';
+use funcs;
 
-use Test::More;
-
-BEGIN {
-
-    plan skip_all => 'Must set FB_TEST_USERID & _PASSWD for live tests.'
-        unless exists $ENV{FB_TEST_USERID} && exists $ENV{FB_TEST_PASSWD};
-
-    plan tests => 12;
-}
+BEGIN { env_login_check(12) }
 
 use Fedora::Bugzilla;
 
@@ -111,6 +106,8 @@ diag 'attachment count == ' . $bug->attachment_count;
 my $a = $bug->first_attachment;
 
 isa_ok $a, 'Fedora::Bugzilla::Bug::Attachment';
+
+done_testing;
 
 __END__
 
