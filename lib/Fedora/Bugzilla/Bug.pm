@@ -53,7 +53,7 @@ our $VERSION = '0.13';
 has bz => (is => 'ro', isa => 'Fedora::Bugzilla', required => 1, track_dirty => 0);
 
 ########################################################################
-# Handle alias on construction correctly
+# Handle the alias on construction correctly
 
 #around BUILDARGS => sub {
 sub foo_XXX {
@@ -77,7 +77,7 @@ sub foo_XXX {
     }
 
     return $class->$orig(@_);
-};
+}
 
 ########################################################################
 # data: the meat of it
@@ -159,14 +159,14 @@ sub update {
 # default attribute attributes :-)
 my @defaults = (
     clear_master => 'data',
-
-    is         => 'ro',
-    isa        => 'Str',
-    lazy_build => 1,
+    is          => 'ro',
+    isa         => 'Str',
+    lazy_build  => 1,
+    track_dirty => 0,
 );
 
 my @rw_defaults = (
-    clear_master => 'data',
+    clear_master   => 'data',
 
     is         => 'rw',
     isa        => 'Str',
@@ -216,7 +216,7 @@ sub _build_id {
 
 has alias => (is => 'rw', isa => 'Maybe[Str]', lazy_build => 1);
 
-sub _build_alias { 
+sub _build_alias {
 
     my $self = shift @_;
     my $data = $self->data->{alias};
