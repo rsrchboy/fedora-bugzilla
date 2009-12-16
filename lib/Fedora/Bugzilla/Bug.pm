@@ -17,8 +17,8 @@
 
 package Fedora::Bugzilla::Bug;
 
-use namespace::autoclean;
-use MooseX::MarkAsMethods;
+
+use MooseX::MarkAsMethods autoclean => 1;
 
 use overload '""' => sub { shift->id }, fallback => 1;
 

@@ -22,8 +22,8 @@ use Moose;
 use Fedora::Bugzilla::Types  qw{ BugzillaDateTime EmailAddress };
 use MooseX::Types::DateTimeX 'DateTime';
 
-use namespace::autoclean;
-use MooseX::MarkAsMethods;
+
+use MooseX::MarkAsMethods autoclean => 1;
 
 
 use overload '""' => sub { shift->as_string }, fallback => 1;

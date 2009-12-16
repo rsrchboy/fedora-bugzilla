@@ -25,8 +25,8 @@ use Moose::Util::TypeConstraints;
 use MooseX::Types::URI qw{ Uri };
 use MooseX::Types::DateTime qw{ DateTime };
 
-use namespace::autoclean;
-use MooseX::MarkAsMethods;
+
+use MooseX::MarkAsMethods autoclean => 1;
 
 
 our $VERSION = '0.13';

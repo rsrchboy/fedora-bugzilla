@@ -27,8 +27,8 @@ with 'Fedora::Bugzilla::Role::NewHash';
 use MIME::Base64;
 use Path::Class;
 
-use namespace::autoclean;
-use MooseX::MarkAsMethods;
+
+use MooseX::MarkAsMethods autoclean => 1;
 
 
 our $VERSION = '0.13';

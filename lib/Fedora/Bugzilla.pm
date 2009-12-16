@@ -17,14 +17,14 @@
 
 package Fedora::Bugzilla;
 
-use namespace::autoclean;
+
 
 # moose core
 use Moose;
 use Moose::Util::TypeConstraints;
 
 # moose extensions
-use MooseX::MarkAsMethods;
+use MooseX::MarkAsMethods autoclean => 1;
 use MooseX::Types::Path::Class qw{ File Dir };
 use MooseX::Types::URI qw{ Uri };
 use MooseX::AttributeHelpers;
