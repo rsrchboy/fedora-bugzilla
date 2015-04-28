@@ -23,7 +23,6 @@ use MooseX::AttributeHelpers;
 
 use Moose::Util::TypeConstraints;
 use MooseX::Types::URI qw{ Uri };
-use MooseX::Types::DateTime qw{ DateTime };
 
 
 use MooseX::MarkAsMethods autoclean => 1;
