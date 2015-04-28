@@ -27,9 +27,10 @@ requires 'MooseX::MultiInitArg';
 requires 'MooseX::StrictConstructor';
 requires 'MooseX::TrackDirty::Attributes';
 requires 'MooseX::Types';
-requires 'MooseX::Types::DateTime';
+requires 'MooseX::Types::DateTimeX';
 requires 'MooseX::Types::Path::Class';
 requires 'MooseX::Types::URI';
+requires 'Path::Class'
 requires 'Regexp::Common';
 requires 'URI::Fetch';
 requires 'URI::Find';
